@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
 
-export async function connect() {
+export default async function handler(res,req) {
   try {
-   mongoose.connect(process.env.MONGO_URI!);    
+   await mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology:true,
+   });    
+
    const connection = mongoose.connection;
    
    connection.on('connected', () => {
@@ -10,16 +14,16 @@ export async function connect() {
    })
 
    connection.on('error', (err) => {
-    console.log('MongoDB connection error. Please make sure MongoDB is running. ' + err);
-    process.exit();
-   })
+    console.log('MongoDB connection error:', err);
+    res.status(500).json({error:'MongoDB connection error'});
+   });
 
+   res.status(200).json({message: 'MongoDB connected successfully'});
 } catch (error) {
-    console.log('Something goes wrong!');
-    console.log(error);
+    console.log('Something goes wrong!',error);
+    res.status(500).json({error:'Something went wrong'});
 
 }
-
 
 }
 
